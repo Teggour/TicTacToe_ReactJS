@@ -41,21 +41,29 @@ function Game() {
                 setMessageTxt("Player X's turn:")
             }
 
-            setCount(count + 1)
+            setCount(count = count + 1)
             setSquares(squares = [...allCells])
         }
         else {
             let errorSound = new Audio(errorURL)
             errorSound.play()
+            if (count !== 9) {
+                setMessageTxt("This field is already filled! Choose a free field...")
+            }
         }
+
         searchWinner()
+
+        if (count === 9 && win === false) {
+            setMessageTxt("Draw!")
+        }
     }
 
     function searchWinner() {
         let currentPlayer =
             (count % 2 === 0)
-                ? "X"
-                : "O"
+                ? "O"
+                : "X"
 
         for (let i = 0; i < winCombinations.length; i++) {
             let winCombo = winCombinations[i]
@@ -65,7 +73,7 @@ function Game() {
                     checker++
                     if (checker === winCombo.length) {
                         setMessageTxt(`Player ${currentPlayer}'s WIN!`)
-                        setWin(true)
+                        setWin(win = true)
                     }
                 }
             }
