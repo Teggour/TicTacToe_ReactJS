@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import style from './style.module.css'
+// import style from './style.module.css'
 
 import restartURL from '../../sounds/restart.mp3'
 import homeURL from '../../sounds/home.mp3'
@@ -126,21 +126,21 @@ function Game() {
 
     return (
         <React.Fragment>
-            <div className={style.message}>{messageTxt}</div>
-            <div className={style.myGame}>
-                <div className={style.cell} data="0">{squares[0]}</div>
-                <div className={style.cell} data="1">{squares[1]}</div>
-                <div className={style.cell} data="2">{squares[2]}</div>
-                <div className={style.cell} data="3">{squares[3]}</div>
-                <div className={style.cell} data="4">{squares[4]}</div>
-                <div className={style.cell} data="5">{squares[5]}</div>
-                <div className={style.cell} data="6">{squares[6]}</div>
-                <div className={style.cell} data="7">{squares[7]}</div>
-                <div className={style.cell} data="8">{squares[8]}</div>
+            <div className='message'><h1>Computer Vs Computer</h1></div>
+            <div className='message'>{messageTxt}</div>
+            <div className='myGame'>
+                <div className='cell' data="0">{squares[0]}</div>
+                <div className='cell' data="1">{squares[1]}</div>
+                <div className='cell' data="2">{squares[2]}</div>
+                <div className='cell' data="3">{squares[3]}</div>
+                <div className='cell' data="4">{squares[4]}</div>
+                <div className='cell' data="5">{squares[5]}</div>
+                <div className='cell' data="6">{squares[6]}</div>
+                <div className='cell' data="7">{squares[7]}</div>
+                <div className='cell' data="8">{squares[8]}</div>
             </div>
-            <div className={style.buttons}>
-                <button className={style.restart} onClick={restartClick}>Restart</button>
-                <button className={style.menu} onClick={menuClick}>Menu</button>
+            <div className='buttons'>
+                <button className='button' onClick={restartClick}>Restart</button>
             </div>
         </React.Fragment>
     )

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import style from './style.module.css'
+// import style from './style.module.css'
 
 import clickURL from '../../sounds/click.mp3'
 import errorURL from '../../sounds/error.mp3'
@@ -50,7 +50,11 @@ function Game() {
         }
         else {
             errorSound.play()
-            if (count !== 9) {
+            if(count % 2 !== 0 && win === false)
+            {
+                setMessageTxt("Wait!")
+            }
+            else if (count !== 9 && win === false) {
                 setMessageTxt("This field is already filled! Choose a free field...")
             }
         }
@@ -130,21 +134,21 @@ function Game() {
 
     return (
         <React.Fragment>
-            <div className={style.message}>{messageTxt}</div>
-            <div className={style.myGame}>
-                <div className={style.cell} onClick={cellClick} data="0">{squares[0]}</div>
-                <div className={style.cell} onClick={cellClick} data="1">{squares[1]}</div>
-                <div className={style.cell} onClick={cellClick} data="2">{squares[2]}</div>
-                <div className={style.cell} onClick={cellClick} data="3">{squares[3]}</div>
-                <div className={style.cell} onClick={cellClick} data="4">{squares[4]}</div>
-                <div className={style.cell} onClick={cellClick} data="5">{squares[5]}</div>
-                <div className={style.cell} onClick={cellClick} data="6">{squares[6]}</div>
-                <div className={style.cell} onClick={cellClick} data="7">{squares[7]}</div>
-                <div className={style.cell} onClick={cellClick} data="8">{squares[8]}</div>
+            <div className='message'><h1>Player Vs Computer</h1></div>
+            <div className='message'>{messageTxt}</div>
+            <div className='myGame'>
+                <div className='cell' onClick={cellClick} data="0">{squares[0]}</div>
+                <div className='cell' onClick={cellClick} data="1">{squares[1]}</div>
+                <div className='cell' onClick={cellClick} data="2">{squares[2]}</div>
+                <div className='cell' onClick={cellClick} data="3">{squares[3]}</div>
+                <div className='cell' onClick={cellClick} data="4">{squares[4]}</div>
+                <div className='cell' onClick={cellClick} data="5">{squares[5]}</div>
+                <div className='cell' onClick={cellClick} data="6">{squares[6]}</div>
+                <div className='cell' onClick={cellClick} data="7">{squares[7]}</div>
+                <div className='cell' onClick={cellClick} data="8">{squares[8]}</div>
             </div>
-            <div className={style.buttons}>
-                <button className={style.restart} onClick={restartClick}>Restart</button>
-                <button className={style.menu} onClick={menuClick}>Menu</button>
+            <div className='buttons'>
+                <button className='button' onClick={restartClick}>Restart</button>
             </div>
         </React.Fragment>
     )
