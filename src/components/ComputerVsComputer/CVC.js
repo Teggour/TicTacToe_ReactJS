@@ -10,7 +10,7 @@ function Game() {
     let [squares, setSquares] = useState(Array(9).fill(null))
     let [count, setCount] = useState(0)
     let [win, setWin] = useState(false)
-    let [restartApp, setRestartApp] = useState(false)
+    let [restartApp, setRestartApp] = useState(true)
     let [messageTxt, setMessageTxt] = useState("Player X's turn:")
     
     let respectSound = new Audio(respectURL)
@@ -32,8 +32,8 @@ function Game() {
 
     // componentDidMount()
     useEffect(() => {
-        if(!restartApp) {
-            setRestartApp(restartApp = true)
+        if(restartApp) {
+            setRestartApp(restartApp = false)
             steps()
         }
     })
@@ -43,7 +43,6 @@ function Game() {
 
         (async function main() {
             for (let i = 0; i < stepsArr.length; i++) {
-
                 await delay(1000)
 
                 let cellNum = stepsArr[i]
@@ -118,7 +117,7 @@ function Game() {
         stepsArr = shuffle([...Array(9).keys()])
         setMessageTxt("Player X's turn:")
 
-        setRestartApp(restartApp = false)
+        setRestartApp(restartApp = true)
     }
 
     function menuClick() {

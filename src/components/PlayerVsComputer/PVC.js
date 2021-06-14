@@ -35,20 +35,18 @@ function Game() {
         let cellNum = event.target.getAttribute('data')
         let allCells = squares
 
-        if (win === false && allCells[cellNum] === null) {
+        if (win === false && allCells[cellNum] === null && count % 2 === 0) {
             clickSound.play()
 
-            if (count % 2 === 0) {
-                allCells[cellNum] = "X"
-                setMessageTxt("Player O's turn:")
-            }
-            else {
-                allCells[cellNum] = "O"
-                setMessageTxt("Player X's turn:")
-            }
+            allCells[cellNum] = "X"
+            setMessageTxt("Player O's turn:")
 
             setCount(count = count + 1)
             setSquares(squares = [...allCells])
+
+            searchWinner()
+
+            stepComputer()
         }
         else {
             errorSound.play()
@@ -57,11 +55,42 @@ function Game() {
             }
         }
 
-        searchWinner()
-
         if (count === 9 && win === false) {
             setMessageTxt("Draw!")
         }
+    }
+
+    function stepComputer() {
+        const delay = (ms) => new Promise(resolve => { setTimeout(resolve, ms) });
+
+        (async function main() {
+            await delay(1000)
+
+            let allCells = squares
+            let emptyIndexes = getAllIndexes(allCells, null)
+            let cellNum = emptyIndexes[Math.floor(Math.random() * emptyIndexes.length)]
+
+            if (win === false) {
+                allCells[cellNum] = "O"
+
+                setCount(count = count + 1)
+                setSquares(squares = [...allCells])
+                setMessageTxt("Player X's turn:")
+            }
+            else {
+                return
+            }
+
+            searchWinner()
+        })()
+    }
+
+    function getAllIndexes(arr, val) {
+        let indexes = []
+        for (let i = 0; i < arr.length; i++)
+            if (arr[i] === val)
+                indexes.push(i)
+        return indexes
     }
 
     function searchWinner() {
