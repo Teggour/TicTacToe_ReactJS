@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react'
-// import style from './style.module.css'
 
 import restartURL from '../../sounds/restart.mp3'
-import homeURL from '../../sounds/home.mp3'
 import respectURL from '../../sounds/respect.mp3'
+import wastedURL from '../../sounds/wasted.mp3'
 
 
 function Game() {
-    let [squares, setSquares] = useState(Array(9).fill(null))
-    let [count, setCount] = useState(0)
-    let [win, setWin] = useState(false)
-    let [restartApp, setRestartApp] = useState(true)
-    let [messageTxt, setMessageTxt] = useState("Player X's turn:")
-    
-    let respectSound = new Audio(respectURL)
-    let homeSound = new Audio(homeURL)
-    let restartSound = new Audio(restartURL)
+    const [squares, setSquares] = useState(Array(9).fill(null))
+    const [count, setCount] = useState(0)
+    const [winner, setWinner] = useState(undefined)
+    const [messageTxt, setMessageTxt] = useState("Player X's turn:")
+
+    const respectSound = new Audio(respectURL)
+    const restartSound = new Audio(restartURL)
+    const wastedSound = new Audio(wastedURL)
+
+    const delay = (ms) => new Promise(resolve => { setTimeout(resolve, ms) })
 
     const winCombinations = [
         [0, 1, 2],
@@ -28,68 +28,8 @@ function Game() {
         [2, 4, 6]
     ]
 
-    let stepsArr = shuffle([...Array(9).keys()])
-
-    // componentDidMount()
     useEffect(() => {
-        if(restartApp) {
-            setRestartApp(restartApp = false)
-            steps()
-        }
-    })
-
-    function steps() {
-        const delay = (ms) => new Promise(resolve => { setTimeout(resolve, ms) });
-
-        (async function main() {
-            for (let i = 0; i < stepsArr.length; i++) {
-                await delay(1000)
-
-                let cellNum = stepsArr[i]
-                let allCells = squares
-
-                if (win === false) {
-                    if (count % 2 === 0) {
-                        allCells[cellNum] = "X"
-                        setMessageTxt("Player O's turn:")
-                    }
-                    else {
-                        allCells[cellNum] = "O"
-                        setMessageTxt("Player X's turn:")
-                    }
-
-                    setCount(count = count + 1)
-                    setSquares(squares = [...allCells])
-                }
-                else {
-                    return
-                }
-
-                searchWinner()
-
-                if (count === 9 && win === false) {
-                    setMessageTxt("Draw!")
-                }
-            }
-        })()
-    }
-
-    function shuffle(arr) {
-        var j, temp;
-        for (var i = arr.length - 1; i > 0; i--) {
-            j = Math.floor(Math.random() * (i + 1));
-            temp = arr[j];
-            arr[j] = arr[i];
-            arr[i] = temp;
-        }
-        return arr;
-    }
-
-    function searchWinner() {
-        let currentPlayer =
-            (count % 2 === 0)
-                ? "O"
-                : "X"
+        let currentPlayer = (count % 2 === 0) ? "O" : "X"
 
         for (let i = 0; i < winCombinations.length; i++) {
             let winCombo = winCombinations[i]
@@ -98,30 +38,59 @@ function Game() {
                 if (squares[winCombo[j]] === currentPlayer) {
                     checker++
                     if (checker === winCombo.length) {
-                        respectSound.play()
-
-                        setMessageTxt(`Player ${currentPlayer}'s WIN!`)
-                        setWin(win = true)
+                        setWinner(currentPlayer)
+                        return () => { }
                     }
                 }
             }
         }
+
+        if (count === 9) {
+            wastedSound.play()
+            setMessageTxt("Draw!")
+            return () => { }
+        }
+
+        if (!winner) {
+            (async function main() {
+                await delay(1000)
+
+                let allCells = squares
+                let emptyIndexes = getAllIndexes(allCells, null)
+                let cellNum = emptyIndexes[Math.floor(Math.random() * emptyIndexes.length)]
+
+                currentPlayer = (count % 2 === 0) ? "X" : "O"
+                allCells[cellNum] = currentPlayer
+
+                setMessageTxt(currentPlayer === 'X' ? "Player O's turn:" : "Player X's turn:")
+                setCount(count + 1)
+                setSquares([...allCells])
+            })()
+        }
+    }, [squares])
+
+    useEffect(() => {
+        if (winner) {
+            respectSound.play()
+            setMessageTxt(`Player ${winner}'s WIN!`)
+        }
+    }, [winner])
+
+    function getAllIndexes(arr, val) {
+        let indexes = []
+        for (let i = 0; i < arr.length; i++)
+            if (arr[i] === val)
+                indexes.push(i)
+        return indexes
     }
 
     function restartClick() {
         restartSound.play()
 
-        setWin(false)
+        setWinner(undefined)
         setCount(0)
         setSquares(Array(9).fill(null))
-        stepsArr = shuffle([...Array(9).keys()])
         setMessageTxt("Player X's turn:")
-
-        setRestartApp(restartApp = true)
-    }
-
-    function menuClick() {
-        homeSound.play()
     }
 
     return (

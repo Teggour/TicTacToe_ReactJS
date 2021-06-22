@@ -1,24 +1,22 @@
-import React, { useState } from 'react'
-// import style from './style.module.css'
+import React, { useState, useEffect } from 'react'
 
 import clickURL from '../../sounds/click.mp3'
 import errorURL from '../../sounds/error.mp3'
 import restartURL from '../../sounds/restart.mp3'
-import homeURL from '../../sounds/home.mp3'
 import respectURL from '../../sounds/respect.mp3'
+import wastedURL from '../../sounds/wasted.mp3'
 
 
 function Game() {
-    let [squares, setSquares] = useState(Array(9).fill(null))
-    let [count, setCount] = useState(0)
-    let [win, setWin] = useState(false)
-    let [messageTxt, setMessageTxt] = useState("Player X's turn:")
+    const [squares, setSquares] = useState(Array(9).fill(null))
+    const [count, setCount] = useState(0)
+    const [winner, setWinner] = useState(undefined)
+    const [messageTxt, setMessageTxt] = useState("Player X's turn:")
 
-    let homeSound = new Audio(homeURL)
-    let restartSound = new Audio(restartURL)
-    let errorSound = new Audio(errorURL)
-    let clickSound = new Audio(clickURL)
-    let respectSound = new Audio(respectURL)
+    const restartSound = new Audio(restartURL)
+    const errorSound = new Audio(errorURL)
+    const clickSound = new Audio(clickURL)
+
 
     const winCombinations = [
         [0, 1, 2],
@@ -31,58 +29,59 @@ function Game() {
         [2, 4, 6]
     ]
 
+    useEffect(() => {
+        (function searchWinner() {
+            let currentPlayer = (count % 2 === 0) ? "O" : "X"
+
+            for (let i = 0; i < winCombinations.length; i++) {
+                let winCombo = winCombinations[i]
+                let checker = 0
+                for (let j = 0; j < winCombo.length; j++) {
+                    if (squares[winCombo[j]] === currentPlayer) {
+                        checker++
+                        if (checker === winCombo.length) {
+                            setWinner(currentPlayer)
+                            return () => {}
+                        }
+                    }
+                }
+            }
+
+            if (count === 9) {
+                const wastedSound = new Audio(wastedURL)
+                wastedSound.play()
+                setMessageTxt("Draw!")
+                return () => {}
+            }
+        })()
+    }, [squares])
+
+    useEffect(() => {
+        if (winner) {
+            const respectSound = new Audio(respectURL)
+            respectSound.play()
+            setMessageTxt(`Player ${winner}'s WIN!`)
+        }
+    }, [winner])
+
     function cellClick(event) {
         let cellNum = event.target.getAttribute('data')
         let allCells = squares
+        let currentPlayer = (count % 2) === 0 ? "X" : "O"
 
-        if (win === false && allCells[cellNum] === null) {
+        if (allCells[cellNum] === null && !winner) {
             clickSound.play()
 
-            if (count % 2 === 0) {
-                allCells[cellNum] = "X"
-                setMessageTxt("Player O's turn:")
-            }
-            else {
-                allCells[cellNum] = "O"
-                setMessageTxt("Player X's turn:")
-            }
+            allCells[cellNum] = currentPlayer
+            setMessageTxt((count % 2 === 0) ? "Player O's turn:" : "Player X's turn:")
 
-            setCount(count = count + 1)
-            setSquares(squares = [...allCells])
+            setCount(count + 1)
+            setSquares([...allCells])
         }
         else {
             errorSound.play()
-            if (count !== 9) {
+            if (count !== 9 && !winner) {
                 setMessageTxt("This field is already filled! Choose a free field...")
-            }
-        }
-
-        searchWinner()
-
-        if (count === 9 && win === false) {
-            setMessageTxt("Draw!")
-        }
-    }
-
-    function searchWinner() {
-        let currentPlayer =
-            (count % 2 === 0)
-                ? "O"
-                : "X"
-
-        for (let i = 0; i < winCombinations.length; i++) {
-            let winCombo = winCombinations[i]
-            let checker = 0
-            for (let j = 0; j < winCombo.length; j++) {
-                if (squares[winCombo[j]] === currentPlayer) {
-                    checker++
-                    if (checker === winCombo.length) {
-                        respectSound.play()
-
-                        setMessageTxt(`Player ${currentPlayer}'s WIN!`)
-                        setWin(win = true)
-                    }
-                }
             }
         }
     }
@@ -91,12 +90,8 @@ function Game() {
         restartSound.play()
         setSquares(Array(9).fill(null))
         setCount(0)
-        setWin(false)
+        setWinner(undefined)
         setMessageTxt("Player X's turn:")
-    }
-
-    function menuClick() {
-        homeSound.play()
     }
 
     return (

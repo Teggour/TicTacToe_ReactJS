@@ -1,24 +1,23 @@
-import React, { useState } from 'react'
-// import style from './style.module.css'
+import React, { useState, useEffect } from 'react'
 
 import clickURL from '../../sounds/click.mp3'
 import errorURL from '../../sounds/error.mp3'
 import restartURL from '../../sounds/restart.mp3'
-import homeURL from '../../sounds/home.mp3'
 import respectURL from '../../sounds/respect.mp3'
+import wastedURL from '../../sounds/wasted.mp3'
 
 
 function Game() {
-    let [squares, setSquares] = useState(Array(9).fill(null))
-    let [count, setCount] = useState(0)
-    let [win, setWin] = useState(false)
-    let [messageTxt, setMessageTxt] = useState("Player X's turn:")
+    const [squares, setSquares] = useState(Array(9).fill(null))
+    const [count, setCount] = useState(0)
+    const [winner, setWinner] = useState(undefined)
+    const [messageTxt, setMessageTxt] = useState("Player X's turn:")
 
-    let homeSound = new Audio(homeURL)
-    let restartSound = new Audio(restartURL)
-    let errorSound = new Audio(errorURL)
-    let clickSound = new Audio(clickURL)
-    let respectSound = new Audio(respectURL)
+    const restartSound = new Audio(restartURL)
+    const errorSound = new Audio(errorURL)
+    const clickSound = new Audio(clickURL)
+    const respectSound = new Audio(respectURL)
+    const wastedSound = new Audio(wastedURL)
 
     const winCombinations = [
         [0, 1, 2],
@@ -31,62 +30,84 @@ function Game() {
         [2, 4, 6]
     ]
 
+    useEffect(() => {
+        let currentPlayer = (count % 2 === 0) ? "O" : "X"
+
+        for (let i = 0; i < winCombinations.length; i++) {
+            let winCombo = winCombinations[i]
+            let checker = 0
+            for (let j = 0; j < winCombo.length; j++) {
+                if (squares[winCombo[j]] === currentPlayer) {
+                    checker++
+                    if (checker === winCombo.length) {
+                        setWinner(currentPlayer)
+                        return () => {}
+                    }
+                }
+            }
+        }
+
+        if (count === 9) {
+            setMessageTxt("Draw!")
+            return () => {}
+        }
+
+        if (count % 2 !== 0 && !winner) {
+            const delay = (ms) => new Promise(resolve => { setTimeout(resolve, ms) });
+
+            (async function main() {
+                await delay(1000)
+
+                let allCells = squares
+                let emptyIndexes = getAllIndexes(allCells, null)
+                let cellNum = emptyIndexes[Math.floor(Math.random() * emptyIndexes.length)]
+
+                if (!winner) {
+                    allCells[cellNum] = "O"
+
+                    setMessageTxt("Player X's turn:")
+                    setCount(count + 1)
+                    setSquares([...allCells])
+                }
+                else {
+                    return () => {}
+                }
+            })()
+        }
+    }, [squares])
+
+    useEffect(() => {
+        if (winner) {
+            (winner === 'X')
+                ? respectSound.play()
+                : wastedSound.play()
+
+            setMessageTxt(`Player ${winner}'s WIN!`)
+        }
+    }, [winner])
+
     function cellClick(event) {
         let cellNum = event.target.getAttribute('data')
         let allCells = squares
 
-        if (win === false && allCells[cellNum] === null && count % 2 === 0) {
+        if (!winner && allCells[cellNum] === null && count % 2 === 0) {
             clickSound.play()
 
             allCells[cellNum] = "X"
+
             setMessageTxt("Player O's turn:")
-
-            setCount(count = count + 1)
-            setSquares(squares = [...allCells])
-
-            searchWinner()
-
-            stepComputer()
+            setCount(count + 1)
+            setSquares([...allCells])
         }
         else {
             errorSound.play()
-            if(count % 2 !== 0 && win === false)
-            {
+            if (count % 2 !== 0 && !winner) {
                 setMessageTxt("Wait!")
             }
-            else if (count !== 9 && win === false) {
+            else if (count !== 9 && !winner) {
                 setMessageTxt("This field is already filled! Choose a free field...")
             }
         }
-
-        if (count === 9 && win === false) {
-            setMessageTxt("Draw!")
-        }
-    }
-
-    function stepComputer() {
-        const delay = (ms) => new Promise(resolve => { setTimeout(resolve, ms) });
-
-        (async function main() {
-            await delay(1000)
-
-            let allCells = squares
-            let emptyIndexes = getAllIndexes(allCells, null)
-            let cellNum = emptyIndexes[Math.floor(Math.random() * emptyIndexes.length)]
-
-            if (win === false) {
-                allCells[cellNum] = "O"
-
-                setCount(count = count + 1)
-                setSquares(squares = [...allCells])
-                setMessageTxt("Player X's turn:")
-            }
-            else {
-                return
-            }
-
-            searchWinner()
-        })()
     }
 
     function getAllIndexes(arr, val) {
@@ -97,39 +118,13 @@ function Game() {
         return indexes
     }
 
-    function searchWinner() {
-        let currentPlayer =
-            (count % 2 === 0)
-                ? "O"
-                : "X"
-
-        for (let i = 0; i < winCombinations.length; i++) {
-            let winCombo = winCombinations[i]
-            let checker = 0
-            for (let j = 0; j < winCombo.length; j++) {
-                if (squares[winCombo[j]] === currentPlayer) {
-                    checker++
-                    if (checker === winCombo.length) {
-                        respectSound.play()
-
-                        setMessageTxt(`Player ${currentPlayer}'s WIN!`)
-                        setWin(win = true)
-                    }
-                }
-            }
-        }
-    }
-
     function restartClick() {
         restartSound.play()
+
         setSquares(Array(9).fill(null))
         setCount(0)
-        setWin(false)
+        setWinner(undefined)
         setMessageTxt("Player X's turn:")
-    }
-
-    function menuClick() {
-        homeSound.play()
     }
 
     return (
